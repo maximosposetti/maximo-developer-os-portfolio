@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Minus, Square, ExternalLink, Github, Download, ChevronRight } from "lucide-react";
+import { X, Minus, Square, ExternalLink, GitBranch, Download, ChevronRight } from "lucide-react";
 
 // ── DATA ──────────────────────────────────────────────────────────────────────
 
@@ -564,7 +564,7 @@ function ProjectsContent() {
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <Github size={9} />
+                  <GitBranch size={9} />
                   GitHub
                 </a>
               </div>
@@ -966,7 +966,7 @@ function SettingsContent() {
       <div className="mt-3 flex flex-col gap-2">
         {[
           { label: "Download CV", icon: <Download size={10} /> },
-          { label: "GitHub Profile", icon: <Github size={10} /> },
+          { label: "GitHub Profile", icon: <GitBranch size={10} /> },
         ].map(({ label, icon }) => (
           <button
             key={label}
@@ -1114,11 +1114,6 @@ export default function App() {
     const t = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
-
-  const bumpZ = useCallback(() => {
-    setTopZ((z) => z + 1);
-    return topZ + 1;
-  }, [topZ]);
 
   const openWindow = useCallback(
     (id: WinId) => {
