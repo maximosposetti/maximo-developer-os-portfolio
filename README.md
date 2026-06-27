@@ -1,11 +1,37 @@
+# Portfolio Maximo/OS
 
-  # Software-like Portfolio App
+Portfolio interactivo con estilo de sistema operativo.
 
-  This is a code bundle for Software-like Portfolio App. The original project is available at https://www.figma.com/design/pZ3JB8jOL8n6ymW3YZMt4c/Software-like-Portfolio-App.
+## Ejecutar en desarrollo
 
-  ## Running the code
+1. Instala dependencias:
 
-  Run `npm i` to install the dependencies.
+```bash
+npm install
+```
 
-  Run `npm run dev` to start the development server.
-  
+2. Crea un archivo `.env` tomando como base `.env.example` y completa tus datos SMTP.
+
+3. Inicia frontend y backend juntos:
+
+```bash
+npm run dev
+```
+
+La app queda disponible en `http://localhost:5173`.
+
+## Contacto por email
+
+El formulario envia el mensaje a `maximosposetti@hotmail.com` usando Nodemailer y tambien envia una confirmacion al email del remitente.
+
+Para Gmail, `SMTP_PASS` debe ser una contrasena de aplicacion, no la contrasena normal de la cuenta.
+
+## CV
+
+Coloca el PDF del CV en:
+
+```text
+public/Maximo_Sposetti_CV.pdf
+```
+
+El boton `Descargar CV` usa esa ruta.

@@ -1,22 +1,33 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, type FormEvent } from "react";
 import { X, Minus, Square, ExternalLink, GitBranch, Download, ChevronRight } from "lucide-react";
 
 // ── DATA ──────────────────────────────────────────────────────────────────────
+
+const CONTACT_INFO = {
+  email: "maximosposetti@hotmail.com",
+  github: "github.com/maximosposetti",
+  linkedin: "linkedin.com/in/máximo-giuliano-sposetti-580693291",
+  location: "Villa Constitucion, Santa Fe, Argentina",
+};
+
+const GITHUB_URL = "https://github.com/maximosposetti";
+const LINKEDIN_URL = "https://linkedin.com/in/máximo-giuliano-sposetti-580693291";
+const CV_URL = "/Maximo_Sposetti_CV.pdf";
 
 const PROJECTS = [
   {
     id: 1,
     name: "SmashCenter",
-    desc: "Sports center management platform with booking engine, membership tiers, and real-time court availability tracking.",
+    desc: "Plataforma de gestion deportiva con reservas, membresias y disponibilidad de canchas en tiempo real.",
     tech: ["React", "Node.js", "PostgreSQL", "Stripe"],
     demo: "#",
     github: "#",
-    status: "Production",
+    status: "Produccion",
   },
   {
     id: 2,
     name: "DevFlow",
-    desc: "Kanban project tracker for dev teams. Real-time collaboration via WebSockets and deep GitHub integration.",
+    desc: "Tablero Kanban para equipos de desarrollo con colaboracion en tiempo real e integracion con GitHub.",
     tech: ["Next.js", "Prisma", "Socket.io", "TypeScript"],
     demo: "#",
     github: "#",
@@ -25,38 +36,38 @@ const PROJECTS = [
   {
     id: 3,
     name: "PixelCart",
-    desc: "Headless e-commerce storefront with Stripe checkout and CMS-driven product catalog.",
+    desc: "Tienda e-commerce headless con checkout de Stripe y catalogo administrable desde CMS.",
     tech: ["Next.js", "Stripe", "Sanity", "Vercel"],
     demo: "#",
     github: "#",
-    status: "Production",
+    status: "Produccion",
   },
 ];
 
 const SKILLS: Record<string, string[]> = {
   Frontend: ["React", "Next.js", "TypeScript", "Tailwind CSS", "Framer Motion"],
   Backend: ["Node.js", "Express", "PostgreSQL", "Prisma", "REST / GraphQL"],
-  Tools: ["Git", "Docker", "Vercel", "Figma", "Linux"],
+  Herramientas: ["Git", "Docker", "Vercel", "Figma", "Linux"],
 };
 
 const EXPERIENCE = [
   {
-    role: "Frontend Developer",
+    role: "Desarrollador Frontend",
     company: "TechCorp S.A.",
-    period: "2023 – Present",
-    desc: "Led UI rebuild of core product. Reduced load time by 40%. Introduced design system.",
+    period: "2023 - Presente",
+    desc: "Lidere la reconstruccion visual del producto principal, reduje tiempos de carga y consolide un sistema de diseno.",
   },
   {
-    role: "Full Stack Developer",
+    role: "Desarrollador Full Stack",
     company: "Freelance",
-    period: "2021 – 2023",
-    desc: "Built 10+ web apps for clients across retail, sports, and SaaS verticals.",
+    period: "2021 - 2023",
+    desc: "Construi aplicaciones web para clientes de retail, deportes y productos SaaS.",
   },
   {
-    role: "Junior Developer",
+    role: "Desarrollador Junior",
     company: "StartupXYZ",
-    period: "2020 – 2021",
-    desc: "Shipped React features weekly in a fast-paced agile team of 5 engineers.",
+    period: "2020 - 2021",
+    desc: "Desarrolle features en React dentro de un equipo agil con entregas semanales.",
   },
 ];
 
@@ -92,22 +103,22 @@ function execCommand(
   if (cmd === "") return { lines: [] };
   if (cmd === "clear") return { lines: [], action: "clear" };
 
-  if (cmd === "help") {
+  if (cmd === "help" || cmd === "ayuda") {
     return {
       lines: [
         { type: "blank", text: "" },
         { type: "output", text: "┌─ MAXIMO/OS ──────────────────────────────────────┐" },
         { type: "output", text: "│                                                   │" },
-        { type: "output", text: "│   about          Who is Maximo                    │" },
-        { type: "output", text: "│   projects        Portfolio projects               │" },
-        { type: "output", text: "│   experience      Work history                    │" },
-        { type: "output", text: "│   skills          Tech stack                      │" },
-        { type: "output", text: "│   contact         Get in touch                    │" },
-        { type: "output", text: "│   github          Open GitHub                     │" },
-        { type: "output", text: "│   linkedin        Open LinkedIn                   │" },
-        { type: "output", text: "│   download cv     Download resume                 │" },
-        { type: "output", text: "│   open [app]      Open a window                  │" },
-        { type: "output", text: "│   clear           Clear terminal                  │" },
+        { type: "output", text: "│   sobre-mi        Quien es Maximo                 │" },
+        { type: "output", text: "│   proyectos       Proyectos del portfolio          │" },
+        { type: "output", text: "│   experiencia     Historial laboral                │" },
+        { type: "output", text: "│   habilidades     Stack tecnico                    │" },
+        { type: "output", text: "│   contacto        Datos de contacto                │" },
+        { type: "output", text: "│   github          Abrir GitHub                     │" },
+        { type: "output", text: "│   linkedin        Abrir LinkedIn                   │" },
+        { type: "output", text: "│   descargar cv    Descargar CV                     │" },
+        { type: "output", text: "│   abrir [app]     Abrir una ventana                │" },
+        { type: "output", text: "│   limpiar         Limpiar terminal                 │" },
         { type: "output", text: "│                                                   │" },
         { type: "output", text: "└───────────────────────────────────────────────────┘" },
         { type: "blank", text: "" },
@@ -115,26 +126,26 @@ function execCommand(
     };
   }
 
-  if (cmd === "about") {
+  if (cmd === "about" || cmd === "sobre-mi") {
     return {
       lines: [
         { type: "blank", text: "" },
         { type: "output", text: "  ┌──────────────────────────────────┐" },
-        { type: "output", text: "  │  MAXIMO — Full Stack Developer   │" },
-        { type: "output", text: "  │  Buenos Aires, Argentina         │" },
+        { type: "output", text: "  │  MAXIMO - Desarrollador Full Stack │" },
+        { type: "output", text: "  │  Villa Constitucion, Santa Fe      │" },
         { type: "output", text: "  └──────────────────────────────────┘" },
         { type: "blank", text: "" },
-        { type: "output", text: "  Building fast, clean, scalable web apps since 2020." },
-        { type: "output", text: "  Obsessed with great UX, clean architecture, and" },
-        { type: "output", text: "  the details that make products feel polished." },
+        { type: "output", text: "  Construyo aplicaciones web rapidas, limpias y escalables." },
+        { type: "output", text: "  Me enfoco en buena experiencia de usuario, arquitectura clara" },
+        { type: "output", text: "  y detalles que hacen que un producto se sienta cuidado." },
         { type: "blank", text: "" },
-        { type: "system", text: "  Currently open to new opportunities." },
+        { type: "system", text: "  Actualmente abierto a nuevas oportunidades." },
         { type: "blank", text: "" },
       ],
     };
   }
 
-  if (cmd === "projects") {
+  if (cmd === "projects" || cmd === "proyectos") {
     return {
       lines: [
         { type: "blank", text: "" },
@@ -144,13 +155,13 @@ function execCommand(
           { type: "output" as LineType, text: `    ${p.tech.join("  ·  ")}` },
           { type: "blank" as LineType, text: "" },
         ]),
-        { type: "system", text: "  Tip: open projects — to see full project cards." },
+        { type: "system", text: "  Tip: abrir proyectos - para ver las tarjetas completas." },
         { type: "blank", text: "" },
       ],
     };
   }
 
-  if (cmd === "experience") {
+  if (cmd === "experience" || cmd === "experiencia") {
     return {
       lines: [
         { type: "blank", text: "" },
@@ -164,7 +175,7 @@ function execCommand(
     };
   }
 
-  if (cmd === "skills") {
+  if (cmd === "skills" || cmd === "habilidades") {
     return {
       lines: [
         { type: "blank", text: "" },
@@ -177,65 +188,75 @@ function execCommand(
     };
   }
 
-  if (cmd === "contact") {
+  if (cmd === "contact" || cmd === "contacto") {
     return {
       lines: [
         { type: "blank", text: "" },
-        { type: "output", text: "  Email      maximo@dev.com" },
-        { type: "output", text: "  GitHub     github.com/maximo" },
-        { type: "output", text: "  LinkedIn   linkedin.com/in/maximo" },
-        { type: "output", text: "  Location   Buenos Aires, AR" },
+        { type: "output", text: `  Email      ${CONTACT_INFO.email}` },
+        { type: "output", text: `  GitHub     ${CONTACT_INFO.github}` },
+        { type: "output", text: `  LinkedIn   ${CONTACT_INFO.linkedin}` },
+        { type: "output", text: `  Ubicacion  ${CONTACT_INFO.location}` },
         { type: "blank", text: "" },
       ],
     };
   }
 
   if (cmd === "github") {
-    window.open("https://github.com", "_blank");
-    return { lines: [{ type: "system", text: "  Opening GitHub in browser..." }] };
+    window.open(GITHUB_URL, "_blank", "noopener,noreferrer");
+    return { lines: [{ type: "system", text: "  Abriendo GitHub en una nueva pestana..." }] };
   }
 
   if (cmd === "linkedin") {
-    window.open("https://linkedin.com", "_blank");
-    return { lines: [{ type: "system", text: "  Opening LinkedIn in browser..." }] };
+    window.open(LINKEDIN_URL, "_blank", "noopener,noreferrer");
+    return { lines: [{ type: "system", text: "  Abriendo LinkedIn en una nueva pestana..." }] };
   }
 
-  if (cmd === "download cv") {
+  if (cmd === "download cv" || cmd === "descargar cv") {
+    const link = document.createElement("a");
+    link.href = CV_URL;
+    link.download = "Maximo_Sposetti_CV.pdf";
+    link.click();
+
     return {
       lines: [
-        { type: "system", text: "  Downloading Maximo_CV.pdf..." },
+        { type: "system", text: "  Descargando Maximo_Sposetti_CV.pdf..." },
         { type: "output", text: "  [████████████████████] 100%" },
-        { type: "system", text: "  Done. Check your downloads folder." },
+        { type: "system", text: "  Listo. Revisa tu carpeta de descargas." },
       ],
     };
   }
 
-  if (cmd.startsWith("open ")) {
-    const target = cmd.slice(5).trim();
+  if (cmd.startsWith("open ") || cmd.startsWith("abrir ")) {
+    const target = cmd.replace(/^(open|abrir)\s+/, "").trim();
     const map: Record<string, WinId> = {
       projects: "projects",
+      proyectos: "projects",
       about: "about",
+      "sobre-mi": "about",
       contact: "contact",
+      contacto: "contact",
       explorer: "explorer",
+      explorador: "explorer",
       settings: "settings",
+      ajustes: "settings",
       terminal: "terminal",
     };
     if (map[target]) {
       openWindow(map[target]);
-      return { lines: [{ type: "system", text: `  Opening ${target}...` }] };
+      return { lines: [{ type: "system", text: `  Abriendo ${target}...` }] };
     }
     return {
       lines: [
-        { type: "error", text: `  Unknown app: "${target}"` },
-        { type: "system", text: "  Available: projects, about, contact, explorer, settings" },
+        { type: "error", text: `  App desconocida: "${target}"` },
+        { type: "system", text: "  Disponibles: proyectos, sobre-mi, contacto, explorador, ajustes" },
       ],
     };
   }
 
   return {
     lines: [
-      { type: "error", text: `  "${raw.trim()}" is not recognized as a command.` },
-      { type: "system", text: "  Type 'help' to see available commands." },
+      { type: "error", text: `  "${raw.trim()}" no se reconoce como comando.` },
+      { type: "system", text: "  Escribe 'ayuda' para ver los comandos disponibles." },
     ],
   };
 }
@@ -367,9 +388,9 @@ function OsWindow({
 function TerminalContent({ openWindow }: { openWindow: (id: WinId) => void }) {
   const [lines, setLines] = useState<TermLine[]>([
     { type: "system", text: "  Maximo/OS  [Version 1.0.0]" },
-    { type: "system", text: "  (c) Maximo Developer. All rights reserved." },
+    { type: "system", text: "  (c) Maximo Developer. Todos los derechos reservados." },
     { type: "blank", text: "" },
-    { type: "output", text: '  Type "help" to see available commands.' },
+    { type: "output", text: '  Escribe "ayuda" para ver los comandos disponibles.' },
     { type: "blank", text: "" },
   ]);
   const [input, setInput] = useState("");
@@ -489,11 +510,11 @@ function ProjectsContent() {
     >
       <div className="flex items-center gap-2 mb-4">
         <span className="text-xs font-mono uppercase tracking-widest" style={{ color: "#4ade80" }}>
-          Projects
+          Proyectos
         </span>
         <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
         <span className="text-xs font-mono" style={{ color: "#333" }}>
-          {PROJECTS.length} items
+          {PROJECTS.length} proyectos
         </span>
       </div>
       <div className="space-y-3">
@@ -520,9 +541,9 @@ function ProjectsContent() {
                 <span
                   className="text-xs font-mono px-1.5 py-0.5"
                   style={{
-                    background: p.status === "Production" ? "rgba(74,222,128,0.08)" : "rgba(96,165,250,0.08)",
-                    color: p.status === "Production" ? "#4ade80" : "#60a5fa",
-                    border: `1px solid ${p.status === "Production" ? "rgba(74,222,128,0.2)" : "rgba(96,165,250,0.2)"}`,
+                    background: p.status === "Produccion" ? "rgba(74,222,128,0.08)" : "rgba(96,165,250,0.08)",
+                    color: p.status === "Produccion" ? "#4ade80" : "#60a5fa",
+                    border: `1px solid ${p.status === "Produccion" ? "rgba(74,222,128,0.2)" : "rgba(96,165,250,0.2)"}`,
                   }}
                 >
                   {p.status}
@@ -565,7 +586,7 @@ function ProjectsContent() {
                   onClick={(e) => e.stopPropagation()}
                 >
                   <GitBranch size={9} />
-                  GitHub
+                  Codigo
                 </a>
               </div>
             </div>
@@ -608,14 +629,14 @@ function AboutContent() {
           Maximo
         </div>
         <div className="text-xs uppercase tracking-widest" style={{ color: "#4ade80" }}>
-          Full Stack Developer · Buenos Aires, AR
+          Desarrollador Full Stack - Villa Constitucion, Santa Fe
         </div>
       </div>
 
       <p className="text-xs leading-relaxed mb-6" style={{ color: "#666" }}>
-        Building fast, clean, scalable web applications since 2020. I obsess over great UX,
-        clean architecture, and the small details that make a product feel polished.
-        Currently open to new opportunities.
+        Construyo aplicaciones web rapidas, limpias y escalables. Me enfoco en buena
+        experiencia de usuario, arquitectura clara y detalles que hacen que un producto
+        se sienta cuidado. Actualmente abierto a nuevas oportunidades.
       </p>
 
       <div className="mb-6">
@@ -623,7 +644,7 @@ function AboutContent() {
           className="flex items-center gap-2 mb-3"
         >
           <span className="text-xs uppercase tracking-widest" style={{ color: "#4ade80" }}>
-            Experience
+            Experiencia
           </span>
           <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
         </div>
@@ -653,7 +674,7 @@ function AboutContent() {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <span className="text-xs uppercase tracking-widest" style={{ color: "#4ade80" }}>
-            Skills
+            Habilidades
           </span>
           <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
         </div>
@@ -687,8 +708,10 @@ function AboutContent() {
 // ── CONTACT WINDOW ────────────────────────────────────────────────────────────
 
 function ContactContent() {
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [feedback, setFeedback] = useState("");
   const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const isSending = status === "sending";
 
   const inputStyle = {
     background: "transparent",
@@ -702,6 +725,32 @@ function ContactContent() {
     transition: "border-color 0.15s",
   };
 
+  const submitContact = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setStatus("sending");
+    setFeedback("");
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = (await response.json().catch(() => ({}))) as { message?: string };
+
+      if (!response.ok) {
+        throw new Error(data.message ?? "No se pudo enviar el mensaje.");
+      }
+
+      setStatus("sent");
+      setFeedback("Mensaje enviado correctamente. Tambien se envio una confirmacion a tu email.");
+      setForm({ name: "", email: "", message: "" });
+    } catch (error) {
+      setStatus("error");
+      setFeedback(error instanceof Error ? error.message : "No se pudo enviar el mensaje.");
+    }
+  };
+
   return (
     <div
       className="h-full overflow-y-auto p-5"
@@ -713,17 +762,17 @@ function ContactContent() {
     >
       <div className="flex items-center gap-2 mb-4">
         <span className="text-xs uppercase tracking-widest" style={{ color: "#4ade80" }}>
-          Contact
+          Contacto
         </span>
         <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
       </div>
 
       <div className="space-y-2 mb-6">
         {[
-          { label: "Email", value: "maximo@dev.com" },
-          { label: "GitHub", value: "github.com/maximo" },
-          { label: "LinkedIn", value: "linkedin.com/in/maximo" },
-          { label: "Location", value: "Buenos Aires, AR" },
+          { label: "Email", value: CONTACT_INFO.email },
+          { label: "GitHub", value: CONTACT_INFO.github },
+          { label: "LinkedIn", value: CONTACT_INFO.linkedin },
+          { label: "Ubicacion", value: CONTACT_INFO.location },
         ].map(({ label, value }) => (
           <div key={label} className="flex gap-4 text-xs">
             <span className="w-20 shrink-0" style={{ color: "#333" }}>
@@ -736,21 +785,26 @@ function ContactContent() {
 
       <div className="h-px mb-5" style={{ background: "rgba(255,255,255,0.04)" }} />
 
-      {sent ? (
+      {feedback && (
         <div
-          className="text-xs p-3"
+          className="text-xs p-3 mb-4"
           style={{
-            background: "rgba(74,222,128,0.05)",
-            border: "1px solid rgba(74,222,128,0.15)",
-            color: "#4ade80",
+            background: status === "error" ? "rgba(248,113,113,0.06)" : "rgba(74,222,128,0.05)",
+            border:
+              status === "error"
+                ? "1px solid rgba(248,113,113,0.18)"
+                : "1px solid rgba(74,222,128,0.15)",
+            color: status === "error" ? "#f87171" : "#4ade80",
           }}
         >
-          ✓ Message sent. I&apos;ll get back to you soon.
+          {status === "error" ? "Error: " : "OK: "}
+          {feedback}
         </div>
-      ) : (
-        <div className="space-y-3">
+      )}
+
+      <form className="space-y-3" onSubmit={submitContact}>
           {[
-            { label: "Name", key: "name", type: "text" },
+            { label: "Nombre", key: "name", type: "text" },
             { label: "Email", key: "email", type: "email" },
           ].map(({ label, key, type }) => (
             <div key={key}>
@@ -759,6 +813,8 @@ function ContactContent() {
               </div>
               <input
                 type={type}
+                required
+                disabled={isSending}
                 value={form[key as keyof typeof form]}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, [key]: e.target.value }))
@@ -775,9 +831,11 @@ function ContactContent() {
           ))}
           <div>
             <div className="text-xs mb-1.5" style={{ color: "#333" }}>
-              Message
+              Mensaje
             </div>
             <textarea
+              required
+              disabled={isSending}
               value={form.message}
               onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
               rows={4}
@@ -791,25 +849,28 @@ function ContactContent() {
             />
           </div>
           <button
-            onClick={() => setSent(true)}
+            type="submit"
+            disabled={isSending}
             className="text-xs px-4 py-2 font-mono transition-all"
             style={{
               color: "#4ade80",
               border: "1px solid rgba(74,222,128,0.3)",
-              background: "transparent",
+              background: isSending ? "rgba(74,222,128,0.08)" : "transparent",
+              opacity: isSending ? 0.7 : 1,
               fontFamily: "'JetBrains Mono', monospace",
             }}
             onMouseEnter={(e) => {
+              if (isSending) return;
               (e.currentTarget as HTMLButtonElement).style.background = "rgba(74,222,128,0.08)";
             }}
             onMouseLeave={(e) => {
+              if (isSending) return;
               (e.currentTarget as HTMLButtonElement).style.background = "transparent";
             }}
           >
-            send_message()
+            {isSending ? "enviando_mensaje()" : "enviar_mensaje()"}
           </button>
-        </div>
-      )}
+        </form>
     </div>
   );
 }
@@ -821,10 +882,10 @@ function ExplorerContent({ openWindow }: { openWindow: (id: WinId) => void }) {
 
   const apps = [
     { icon: "💻", label: "Terminal.exe", id: "terminal" as WinId, size: "4.2 KB", date: "2024-06-24" },
-    { icon: "📁", label: "Projects", id: "projects" as WinId, size: "128 KB", date: "2024-06-20" },
-    { icon: "👤", label: "About.txt", id: "about" as WinId, size: "12 KB", date: "2024-06-10" },
-    { icon: "✉️", label: "Contact.lnk", id: "contact" as WinId, size: "1 KB", date: "2024-06-24" },
-    { icon: "⚙️", label: "Settings", id: "settings" as WinId, size: "3 KB", date: "2024-05-30" },
+    { icon: "📁", label: "Proyectos", id: "projects" as WinId, size: "128 KB", date: "2024-06-20" },
+    { icon: "👤", label: "Sobre-mi.txt", id: "about" as WinId, size: "12 KB", date: "2024-06-10" },
+    { icon: "✉️", label: "Contacto.lnk", id: "contact" as WinId, size: "1 KB", date: "2024-06-24" },
+    { icon: "⚙️", label: "Ajustes", id: "settings" as WinId, size: "3 KB", date: "2024-05-30" },
   ];
 
   return (
@@ -835,9 +896,9 @@ function ExplorerContent({ openWindow }: { openWindow: (id: WinId) => void }) {
         style={{ borderRight: "1px solid rgba(255,255,255,0.05)" }}
       >
         <div className="text-xs uppercase tracking-widest mb-2 px-2" style={{ color: "#2a2a2a" }}>
-          Places
+          Lugares
         </div>
-        {["Desktop", "Documents", "Downloads", "Trash"].map((loc) => (
+        {["Escritorio", "Documentos", "Descargas", "Papelera"].map((loc) => (
           <button
             key={loc}
             className="flex items-center gap-2 w-full px-2 py-1.5 text-xs text-left transition-colors"
@@ -862,7 +923,7 @@ function ExplorerContent({ openWindow }: { openWindow: (id: WinId) => void }) {
           className="flex items-center px-3 py-1.5 shrink-0"
           style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
         >
-          {["Name", "Size", "Modified"].map((h, i) => (
+          {["Nombre", "Tamano", "Modificado"].map((h, i) => (
             <div
               key={h}
               className="text-xs"
@@ -908,7 +969,7 @@ function ExplorerContent({ openWindow }: { openWindow: (id: WinId) => void }) {
             color: "#2a2a2a",
           }}
         >
-          {apps.length} items · Double-click to open
+          {apps.length} elementos · Doble clic para abrir
         </div>
       </div>
     </div>
@@ -921,13 +982,24 @@ function SettingsContent() {
   const info = [
     { label: "OS", value: "Maximo/OS" },
     { label: "Version", value: "1.0.0" },
-    { label: "Build", value: "2024.06.24" },
-    { label: "Kernel", value: "React 18.3" },
-    { label: "Shell", value: "MaximoSH 1.0" },
-    { label: "Theme", value: "Dark Phosphor" },
-    { label: "Font", value: "JetBrains Mono" },
-    { label: "Uptime", value: "∞" },
+    { label: "Compilacion", value: "2024.06.24" },
+    { label: "Motor", value: "React 19.2" },
+    { label: "Consola", value: "MaximoSH 1.0" },
+    { label: "Tema", value: "Dark Phosphor" },
+    { label: "Fuente", value: "JetBrains Mono" },
+    { label: "Actividad", value: "∞" },
   ];
+
+  const downloadCv = () => {
+    const link = document.createElement("a");
+    link.href = CV_URL;
+    link.download = "Maximo_Sposetti_CV.pdf";
+    link.click();
+  };
+
+  const openGitHub = () => {
+    window.open(GITHUB_URL, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <div
@@ -936,7 +1008,7 @@ function SettingsContent() {
     >
       <div className="flex items-center gap-2 mb-5">
         <span className="text-xs uppercase tracking-widest" style={{ color: "#4ade80" }}>
-          System
+          Sistema
         </span>
         <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
       </div>
@@ -958,18 +1030,19 @@ function SettingsContent() {
 
       <div className="mt-6 flex items-center gap-2">
         <span className="text-xs uppercase tracking-widest" style={{ color: "#4ade80" }}>
-          Links
+          Enlaces
         </span>
         <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
       </div>
 
       <div className="mt-3 flex flex-col gap-2">
         {[
-          { label: "Download CV", icon: <Download size={10} /> },
-          { label: "GitHub Profile", icon: <GitBranch size={10} /> },
-        ].map(({ label, icon }) => (
+          { label: "Descargar CV", icon: <Download size={10} />, onClick: downloadCv },
+          { label: "Perfil de GitHub", icon: <GitBranch size={10} />, onClick: openGitHub },
+        ].map(({ label, icon, onClick }) => (
           <button
             key={label}
+            onClick={onClick}
             className="flex items-center gap-2 text-xs px-3 py-2 transition-colors text-left"
             style={{ color: "#555", border: "1px solid rgba(255,255,255,0.05)" }}
             onMouseEnter={(e) => {
@@ -1050,7 +1123,7 @@ const INITIAL_WINDOWS: Win[] = [
   },
   {
     id: "projects",
-    title: "Projects",
+    title: "Proyectos",
     icon: "📁",
     isOpen: false,
     isMinimized: false,
@@ -1061,7 +1134,7 @@ const INITIAL_WINDOWS: Win[] = [
   },
   {
     id: "about",
-    title: "About  —  Maximo",
+    title: "Sobre mi  —  Maximo",
     icon: "👤",
     isOpen: false,
     isMinimized: false,
@@ -1072,7 +1145,7 @@ const INITIAL_WINDOWS: Win[] = [
   },
   {
     id: "contact",
-    title: "Contact",
+    title: "Contacto",
     icon: "✉️",
     isOpen: false,
     isMinimized: false,
@@ -1083,7 +1156,7 @@ const INITIAL_WINDOWS: Win[] = [
   },
   {
     id: "explorer",
-    title: "File Explorer",
+    title: "Explorador",
     icon: "🗂️",
     isOpen: false,
     isMinimized: false,
@@ -1094,7 +1167,7 @@ const INITIAL_WINDOWS: Win[] = [
   },
   {
     id: "settings",
-    title: "Settings",
+    title: "Ajustes",
     icon: "⚙️",
     isOpen: false,
     isMinimized: false,
@@ -1150,17 +1223,17 @@ export default function App() {
 
   const desktopIcons = [
     { icon: "💻", label: "Terminal", id: "terminal" as WinId },
-    { icon: "🗂️", label: "Explorer", id: "explorer" as WinId },
-    { icon: "📁", label: "Projects", id: "projects" as WinId },
-    { icon: "👤", label: "About", id: "about" as WinId },
-    { icon: "✉️", label: "Contact", id: "contact" as WinId },
-    { icon: "⚙️", label: "Settings", id: "settings" as WinId },
+    { icon: "🗂️", label: "Explorador", id: "explorer" as WinId },
+    { icon: "📁", label: "Proyectos", id: "projects" as WinId },
+    { icon: "👤", label: "Sobre mi", id: "about" as WinId },
+    { icon: "✉️", label: "Contacto", id: "contact" as WinId },
+    { icon: "⚙️", label: "Ajustes", id: "settings" as WinId },
   ];
 
   const openWins = windows.filter((w) => w.isOpen);
 
   const timeStr = time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  const dateStr = time.toLocaleDateString("en-US", {
+  const dateStr = time.toLocaleDateString("es-AR", {
     month: "short",
     day: "numeric",
     year: "numeric",
