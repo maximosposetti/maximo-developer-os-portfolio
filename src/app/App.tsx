@@ -20,26 +20,8 @@ const PROJECTS = [
     name: "SmashCenter",
     desc: "Plataforma de gestion deportiva con reservas, membresias y disponibilidad de canchas en tiempo real.",
     tech: ["React", "Node.js", "PostgreSQL", "Stripe"],
-    demo: "#",
-    github: "#",
-    status: "Produccion",
-  },
-  {
-    id: 2,
-    name: "DevFlow",
-    desc: "Tablero Kanban para equipos de desarrollo con colaboracion en tiempo real e integracion con GitHub.",
-    tech: ["Next.js", "Prisma", "Socket.io", "TypeScript"],
-    demo: "#",
-    github: "#",
-    status: "Beta",
-  },
-  {
-    id: 3,
-    name: "PixelCart",
-    desc: "Tienda e-commerce headless con checkout de Stripe y catalogo administrable desde CMS.",
-    tech: ["Next.js", "Stripe", "Sanity", "Vercel"],
-    demo: "#",
-    github: "#",
+    demo: "https://smashcenter.vercel.app/",
+    github: "",
     status: "Produccion",
   },
 ];
@@ -52,22 +34,16 @@ const SKILLS: Record<string, string[]> = {
 
 const EXPERIENCE = [
   {
-    role: "Desarrollador Frontend",
-    company: "TechCorp S.A.",
-    period: "2023 - Presente",
-    desc: "Lidere la reconstruccion visual del producto principal, reduje tiempos de carga y consolide un sistema de diseno.",
+    role: "Desarrollador Full Stack Freelance",
+    company: "Freelance",
+    period: "2024 - Presente",
+    desc: "Desarrollo soluciones web completas, desde interfaces modernas hasta integraciones backend y despliegues en produccion.",
   },
   {
     role: "Desarrollador Full Stack",
-    company: "Freelance",
-    period: "2021 - 2023",
-    desc: "Construi aplicaciones web para clientes de retail, deportes y productos SaaS.",
-  },
-  {
-    role: "Desarrollador Junior",
-    company: "StartupXYZ",
-    period: "2020 - 2021",
-    desc: "Desarrolle features en React dentro de un equipo agil con entregas semanales.",
+    company: "SmashCenter",
+    period: "2025",
+    desc: "Construccion de una plataforma de gestion deportiva con reservas, membresias, disponibilidad de canchas y experiencia de usuario enfocada en operaciones reales.",
   },
 ];
 
@@ -91,6 +67,26 @@ type LineType = "input" | "output" | "error" | "system" | "blank";
 interface TermLine {
   type: LineType;
   text: string;
+}
+
+function useViewport() {
+  const getViewport = () => ({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  const [viewport, setViewport] = useState(getViewport);
+
+  useEffect(() => {
+    const onResize = () => setViewport(getViewport());
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  return {
+    ...viewport,
+    isMobile: viewport.width < 720,
+  };
 }
 
 // ── TERMINAL COMMAND PROCESSOR ────────────────────────────────────────────────
@@ -265,6 +261,7 @@ function execCommand(
 
 function OsWindow({
   win,
+  isMobile,
   onClose,
   onMinimize,
   onMaximize,
@@ -272,6 +269,7 @@ function OsWindow({
   children,
 }: {
   win: Win;
+  isMobile: boolean;
   onClose: () => void;
   onMinimize: () => void;
   onMaximize: () => void;
@@ -284,7 +282,7 @@ function OsWindow({
 
   useEffect(() => {
     const move = (e: MouseEvent) => {
-      if (!dragging.current) return;
+      if (!dragging.current || isMobile) return;
       setPos({
         x: Math.max(0, e.clientX - dragOffset.current.x),
         y: Math.max(0, e.clientY - dragOffset.current.y),
@@ -299,11 +297,13 @@ function OsWindow({
       document.removeEventListener("mousemove", move);
       document.removeEventListener("mouseup", up);
     };
-  }, []);
+  }, [isMobile]);
 
   if (!win.isOpen || win.isMinimized) return null;
 
-  const posStyle = win.isMaximized
+  const posStyle = isMobile
+    ? { left: 8, top: 8, right: 8, bottom: 8, width: "auto", height: "auto" }
+    : win.isMaximized
     ? { left: 0, top: 0, right: 0, bottom: 0, width: "auto", height: "auto" }
     : { left: pos.x, top: pos.y, width: win.defaultSize.w, height: win.defaultSize.h };
 
@@ -325,21 +325,21 @@ function OsWindow({
         style={{
           background: "#141414",
           borderBottom: "1px solid rgba(255,255,255,0.06)",
-          height: 34,
-          cursor: win.isMaximized ? "default" : "move",
+          height: isMobile ? 38 : 34,
+          cursor: win.isMaximized || isMobile ? "default" : "move",
           userSelect: "none",
         }}
         onMouseDown={(e) => {
-          if (win.isMaximized) return;
+          if (win.isMaximized || isMobile) return;
           dragging.current = true;
           dragOffset.current = { x: e.clientX - pos.x, y: e.clientY - pos.y };
           e.preventDefault();
         }}
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 min-w-0">
           <span style={{ fontSize: 11, color: "#4ade80", opacity: 0.8 }}>◉</span>
           <span
-            className="font-mono"
+            className="font-mono truncate"
             style={{ fontSize: 11, color: "#555", letterSpacing: "0.06em" }}
           >
             {win.title}
@@ -358,7 +358,7 @@ function OsWindow({
           </button>
           <button
             className="flex items-center justify-center transition-colors hover:bg-white/5"
-            style={{ width: 26, height: 26 }}
+            style={{ width: 28, height: 28, display: isMobile ? "none" : "flex" }}
             onClick={(e) => {
               e.stopPropagation();
               onMaximize();
@@ -549,7 +549,7 @@ function ProjectsContent() {
                   {p.status}
                 </span>
               </div>
-              <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex flex-wrap gap-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
                 <a
                   href={p.demo}
                   target="_blank"
@@ -569,25 +569,27 @@ function ProjectsContent() {
                   <ExternalLink size={9} />
                   Demo
                 </a>
-                <a
-                  href={p.github}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-1 text-xs font-mono px-2 py-1 transition-colors"
-                  style={{ color: "#666", border: "1px solid #222" }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = "#4ade80";
-                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(74,222,128,0.3)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = "#666";
-                    (e.currentTarget as HTMLElement).style.borderColor = "#222";
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <GitBranch size={9} />
-                  Codigo
-                </a>
+                {p.github && (
+                  <a
+                    href={p.github}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1 text-xs font-mono px-2 py-1 transition-colors"
+                    style={{ color: "#666", border: "1px solid #222" }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.color = "#4ade80";
+                      (e.currentTarget as HTMLElement).style.borderColor = "rgba(74,222,128,0.3)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.color = "#666";
+                      (e.currentTarget as HTMLElement).style.borderColor = "#222";
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <GitBranch size={9} />
+                    Codigo
+                  </a>
+                )}
               </div>
             </div>
             <p className="text-xs font-mono mb-3 leading-relaxed" style={{ color: "#666" }}>
@@ -774,11 +776,11 @@ function ContactContent() {
           { label: "LinkedIn", value: CONTACT_INFO.linkedin },
           { label: "Ubicacion", value: CONTACT_INFO.location },
         ].map(({ label, value }) => (
-          <div key={label} className="flex gap-4 text-xs">
+          <div key={label} className="flex gap-4 text-xs min-w-0">
             <span className="w-20 shrink-0" style={{ color: "#333" }}>
               {label}
             </span>
-            <span style={{ color: "#777" }}>{value}</span>
+            <span style={{ color: "#777", overflowWrap: "anywhere", minWidth: 0 }}>{value}</span>
           </div>
         ))}
       </div>
@@ -1001,6 +1003,10 @@ function SettingsContent() {
     window.open(GITHUB_URL, "_blank", "noopener,noreferrer");
   };
 
+  const openLinkedIn = () => {
+    window.open(LINKEDIN_URL, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <div
       className="h-full p-5 overflow-y-auto"
@@ -1039,6 +1045,7 @@ function SettingsContent() {
         {[
           { label: "Descargar CV", icon: <Download size={10} />, onClick: downloadCv },
           { label: "Perfil de GitHub", icon: <GitBranch size={10} />, onClick: openGitHub },
+          { label: "Perfil de LinkedIn", icon: <ExternalLink size={10} />, onClick: openLinkedIn },
         ].map(({ label, icon, onClick }) => (
           <button
             key={label}
@@ -1068,30 +1075,41 @@ function SettingsContent() {
 function DesktopIcon({
   icon,
   label,
+  isMobile,
   onDblClick,
 }: {
   icon: string;
   label: string;
+  isMobile: boolean;
   onDblClick: () => void;
 }) {
   const [sel, setSel] = useState(false);
 
   return (
     <button
-      className="flex flex-col items-center gap-1 p-2 w-[72px] transition-colors"
+      className="flex flex-col items-center gap-1 p-2 transition-colors"
       style={{
+        width: isMobile ? 70 : 72,
+        minHeight: isMobile ? 70 : 74,
         background: sel ? "rgba(74,222,128,0.08)" : "transparent",
         border: sel ? "1px solid rgba(74,222,128,0.15)" : "1px solid transparent",
         outline: "none",
         fontFamily: "'JetBrains Mono', monospace",
       }}
-      onClick={() => setSel((s) => !s)}
+      onClick={() => {
+        if (isMobile) {
+          setSel(false);
+          onDblClick();
+          return;
+        }
+        setSel((s) => !s);
+      }}
       onDoubleClick={() => {
         setSel(false);
         onDblClick();
       }}
     >
-      <span style={{ fontSize: 28, lineHeight: 1 }}>{icon}</span>
+      <span style={{ fontSize: isMobile ? 24 : 28, lineHeight: 1 }}>{icon}</span>
       <span
         className="text-center leading-tight"
         style={{
@@ -1178,10 +1196,22 @@ const INITIAL_WINDOWS: Win[] = [
   },
 ];
 
+function getInitialWindows() {
+  if (window.innerWidth >= 720) {
+    return INITIAL_WINDOWS;
+  }
+
+  return INITIAL_WINDOWS.map((win) =>
+    win.id === "terminal" ? { ...win, isOpen: false, isMinimized: false } : win
+  );
+}
+
 export default function App() {
-  const [windows, setWindows] = useState<Win[]>(INITIAL_WINDOWS);
+  const [windows, setWindows] = useState<Win[]>(getInitialWindows);
   const [topZ, setTopZ] = useState(20);
   const [time, setTime] = useState(new Date());
+  const { isMobile } = useViewport();
+  const taskbarHeight = isMobile ? 62 : 44;
 
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000);
@@ -1242,7 +1272,11 @@ export default function App() {
   return (
     <div
       className="w-full h-screen overflow-hidden relative"
-      style={{ background: "#060606", fontFamily: "'JetBrains Mono', monospace" }}
+      style={{
+        background: "#060606",
+        fontFamily: "'JetBrains Mono', monospace",
+        height: "100dvh",
+      }}
     >
       {/* Dot-grid wallpaper */}
       <div
@@ -1263,21 +1297,27 @@ export default function App() {
       />
 
       {/* Desktop workspace */}
-      <div className="absolute inset-0" style={{ bottom: 44 }}>
+      <div className="absolute inset-0" style={{ bottom: taskbarHeight }}>
         {/* Desktop icons – left rail */}
-        <div className="absolute top-4 left-4 flex flex-col gap-0.5">
+        <div
+          className={isMobile ? "absolute top-3 left-3 right-3 grid grid-cols-3 gap-1" : "absolute top-4 left-4 flex flex-col gap-0.5"}
+        >
           {desktopIcons.map((ic) => (
             <DesktopIcon
               key={ic.id}
               icon={ic.icon}
               label={ic.label}
+              isMobile={isMobile}
               onDblClick={() => openWindow(ic.id)}
             />
           ))}
         </div>
 
         {/* OS watermark */}
-        <div className="absolute top-4 right-5 text-right pointer-events-none select-none">
+        <div
+          className="absolute text-right pointer-events-none select-none"
+          style={isMobile ? { right: 16, bottom: 14 } : { top: 16, right: 20 }}
+        >
           <div
             style={{
               fontSize: 11,
@@ -1298,6 +1338,7 @@ export default function App() {
           <OsWindow
             key={win.id}
             win={win}
+            isMobile={isMobile}
             onClose={() => closeWindow(win.id)}
             onMinimize={() => minimizeWindow(win.id)}
             onMaximize={() => maximizeWindow(win.id)}
@@ -1315,18 +1356,27 @@ export default function App() {
 
       {/* Taskbar */}
       <div
-        className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-3"
+        className="absolute bottom-0 left-0 right-0 flex items-center justify-between"
         style={{
-          height: 44,
+          height: taskbarHeight,
+          paddingLeft: isMobile ? 8 : 12,
+          paddingRight: isMobile ? 8 : 12,
           background: "rgba(8,8,8,0.98)",
           borderTop: "1px solid rgba(255,255,255,0.05)",
           backdropFilter: "blur(12px)",
         }}
       >
         {/* Left: start + open windows */}
-        <div className="flex items-center gap-2">
+        <div
+          className="flex items-center gap-2 min-w-0"
+          style={{
+            overflowX: isMobile ? "auto" : "visible",
+            maxWidth: isMobile ? "calc(100% - 76px)" : "none",
+            scrollbarWidth: "none",
+          }}
+        >
           <button
-            className="flex items-center gap-2 px-3 py-1.5 text-xs transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 text-xs transition-colors shrink-0"
             style={{
               color: "#4ade80",
               border: "1px solid rgba(74,222,128,0.2)",
@@ -1340,10 +1390,10 @@ export default function App() {
               (e.currentTarget as HTMLButtonElement).style.background = "rgba(74,222,128,0.04)";
             }}
           >
-            ⊞ MAXIMO/OS
+            {isMobile ? "⊞ OS" : "⊞ MAXIMO/OS"}
           </button>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             {openWins.map((win) => (
               <button
                 key={win.id}
@@ -1373,8 +1423,8 @@ export default function App() {
 
         {/* Right: clock */}
         <div
-          className="flex flex-col items-end"
-          style={{ fontFamily: "'JetBrains Mono', monospace" }}
+          className="flex flex-col items-end shrink-0"
+          style={{ fontFamily: "'JetBrains Mono', monospace", width: isMobile ? 68 : "auto" }}
         >
           <div style={{ fontSize: 11, color: "#666" }}>{timeStr}</div>
           <div style={{ fontSize: 10, color: "#333" }}>{dateStr}</div>
